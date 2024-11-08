@@ -9,9 +9,12 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 moveDirection;
-    private Vector2 moveVelocity;
-    private Vector2 moveFriction;
-    private Vector2 stopFriction;
+
+    // Define fixed boundaries for the player's movement
+    private const float minX = -8.61f;
+    private const float maxX = 8.61f;
+    private const float minY = -5.07f;
+    private const float maxY = 4.67f;
 
     private void Start()
     {
@@ -20,28 +23,48 @@ public class PlayerMovement : MonoBehaviour
 
     public void Move()
     {
+        // Get input from user
         float inputX = Input.GetAxis("Horizontal");
         float inputY = Input.GetAxis("Vertical");
 
-        moveDirection = new Vector2(inputX, inputY).normalized;
+        // Move only if there is input
+        if (inputX != 0 || inputY != 0)
+        {
+            moveDirection = new Vector2(inputX, inputY).normalized;
 
-        float moveVelocityX = 2 * maxSpeed.x / timeToFullSpeed.x;
-        float moveVelocityY = 2 * maxSpeed.y / timeToFullSpeed.y;
-        float moveFrictionX = -2 * maxSpeed.x / Mathf.Pow(timeToStop.x, 2);
-        float moveFrictionY = -2 * maxSpeed.y / Mathf.Pow(timeToStop.y, 2);
-        float stopFrictionX = -2 * maxSpeed.x / Mathf.Pow(timeToStop.x, 2);
-        float stopFrictionY = -2 * maxSpeed.y / Mathf.Pow(timeToStop.y, 2);
+            // Pastikan tidak ada pembagian dengan nol
+            float moveVelocityX = (timeToFullSpeed.x != 0) ? 2 * maxSpeed.x / timeToFullSpeed.x : 0;
+            float moveVelocityY = (timeToFullSpeed.y != 0) ? 2 * maxSpeed.y / timeToFullSpeed.y : 0;
 
-        Vector2 newVelocity = rb.velocity;
-        
-        newVelocity.x = Mathf.Clamp(newVelocity.x + moveDirection.x * moveVelocityX * Time.fixedDeltaTime, -maxSpeed.x, maxSpeed.x);
-        newVelocity.y = Mathf.Clamp(newVelocity.y + moveDirection.y * moveVelocityY * Time.fixedDeltaTime, -maxSpeed.y, maxSpeed.y);
+            Vector2 newVelocity = rb.velocity;
 
-        rb.velocity = newVelocity;
+            // Calculate new velocity and clamp to maxSpeed
+            newVelocity.x = Mathf.Clamp(newVelocity.x + moveDirection.x * moveVelocityX * Time.fixedDeltaTime, -maxSpeed.x, maxSpeed.x);
+            newVelocity.y = Mathf.Clamp(newVelocity.y + moveDirection.y * moveVelocityY * Time.fixedDeltaTime, -maxSpeed.y, maxSpeed.y);
+
+            rb.velocity = newVelocity;
+        }
+        else
+        {
+            // If no input, stop the player
+            rb.velocity = Vector2.zero;
+        }
+
+        // Clamp position based on the defined boundaries
+        Vector3 clampedPosition = transform.position;
+        clampedPosition.x = Mathf.Clamp(clampedPosition.x, minX, maxX);
+        clampedPosition.y = Mathf.Clamp(clampedPosition.y, minY, maxY);
+
+        transform.position = clampedPosition;
     }
 
     public bool IsMoving()
     {
         return rb.velocity.sqrMagnitude > stopClamp.sqrMagnitude;
+    }
+
+    private void FixedUpdate()
+    {
+        Move();
     }
 }
