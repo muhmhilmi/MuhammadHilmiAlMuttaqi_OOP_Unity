@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: adb1201ecd88ee343aa52c7acca421e7
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - weapon: {fileID: 1544941789736611824, guid: bca6d9998c9a27045a4cbeefc30c6e83, type: 3}
+  - weaponHolder: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
