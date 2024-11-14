@@ -1,36 +1,34 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections; // Menambahkan namespace ini untuk mendukung IEnumerator
 
+// Singleton
 public class LevelManager : MonoBehaviour
 {
-    // Instance untuk singleton
-    public static LevelManager Instance { get; private set; }
+    [SerializeField] Animator animator;
 
-    private void Awake()
+    void Awake()
     {
-        // Pastikan hanya ada satu instance LevelManager
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // Membuat LevelManager tetap ada saat scene berubah
-        }
-        else
-        {
-            Destroy(gameObject); // Menghapus duplikat LevelManager
-        }
+        animator.enabled = false;
+    }
+
+    IEnumerator LoadSceneAsync(string sceneName)
+    {
+        animator.enabled = true;
+
+        // animator.SetTrigger("startTransition");
+
+        yield return new WaitForSeconds(1);
+
+        SceneManager.LoadSceneAsync(sceneName);
+
+        animator.SetTrigger("endTransition");
+
+        Player.Instance.transform.position = new(0, -4.5f);
     }
 
     public void LoadScene(string sceneName)
     {
-        // Memulai proses untuk load scene
-        StartCoroutine(TransitionToScene(sceneName));
-    }
-
-    private IEnumerator TransitionToScene(string sceneName)
-    {
-        // Menambahkan waktu tunggu atau animasi transisi di sini jika diperlukan
-        yield return new WaitForSeconds(1); // Sesuaikan durasi animasi transisi
-        SceneManager.LoadScene(sceneName);
+        StartCoroutine(LoadSceneAsync(sceneName));
     }
 }

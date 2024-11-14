@@ -2,46 +2,45 @@ using UnityEngine;
 
 public class Portal : MonoBehaviour
 {
-    public float speed = 5f;
-    public float rotatespeed = 100f;
-    private Vector3 newPosition;
+    [SerializeField] float speed = 0.15f;
+    [SerializeField] float rotateSpeed = 5.0f;
+
+    Vector2 newPosition;
 
     void Start()
     {
         ChangePosition();
     }
 
-    void ChangePosition()
-    {
-        newPosition = new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0);
-    }
-
     void Update()
     {
-        if (Vector3.Distance(transform.position, newPosition) < 0.5f)
-        {
+        if (Vector2.Distance(transform.position, newPosition) < 0.5f)
             ChangePosition();
-        }
 
-        // Mengakses Player.Instance.HasWeapon
-        if (Player.Instance != null && Player.Instance.HasWeapon)
+
+        if (GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<Weapon>() != null)
         {
-            gameObject.SetActive(true);
+            GetComponent<SpriteRenderer>().enabled = true;
+            GetComponent<Collider2D>().enabled = true;
+            transform.position = Vector2.Lerp(transform.position, newPosition, speed * Time.deltaTime);
         }
         else
         {
-            gameObject.SetActive(false);
+            GetComponent<SpriteRenderer>().enabled = false;
+            GetComponent<Collider2D>().enabled = false;
         }
-
-        transform.position = Vector3.MoveTowards(transform.position, newPosition, speed * Time.deltaTime);
-        transform.Rotate(Vector3.forward * rotatespeed * Time.deltaTime);
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Player"))
         {
-            LevelManager.Instance.LoadScene("Main");
+            GameManager.Instance.LevelManager.LoadScene("Main");
         }
+    }
+
+    void ChangePosition()
+    {
+        newPosition = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
     }
 }

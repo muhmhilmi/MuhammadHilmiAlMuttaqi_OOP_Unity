@@ -4,37 +4,24 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance; // Singleton untuk mengakses GameManager dari mana saja
+    public static GameManager Instance { get; private set; }
+
+    public LevelManager LevelManager { get; private set; }
 
     void Awake()
     {
-        // Implementasi Singleton Pattern
-        if (instance == null)
+        if (Instance != null && Instance != this)
         {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
+            Destroy(this);
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
-    void Start()
-    {
-        RemoveAllObjectsExceptCameraAndPlayer();
-    }
+        Instance = this;
 
-    // Fungsi untuk menghilangkan semua objek kecuali Camera dan Player
-    void RemoveAllObjectsExceptCameraAndPlayer()
-    {
-        GameObject[] allObjects = FindObjectsOfType<GameObject>();
-        foreach (GameObject obj in allObjects)
-        {
-            if (obj.tag != "MainCamera" && obj.tag != "Player")
-            {
-                Destroy(obj);
-            }
-        }
+        LevelManager = GetComponentInChildren<LevelManager>();
+
+        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(GameObject.Find("Camera"));
     }
 }
+

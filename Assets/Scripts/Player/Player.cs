@@ -1,70 +1,63 @@
+using System;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class Player : MonoBehaviour
 {
-    private PlayerMovement playerMovement;
-    private Animator animator;
-
+    // This for getting the instace of Player Singleton
     public static Player Instance { get; private set; }
 
-    // Tambahkan properti HasWeapon
-    public bool HasWeapon { get; private set; }
+    // Getting the PlayerMovement methods
+    PlayerMovement playerMovement;
+    // Animator
+    Animator animator;
 
-    private void Awake()
+
+    // Key for Singleton
+    void Awake()
     {
-        // Singleton pattern untuk memastikan hanya ada satu instance Player
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // Menjaga Player tetap ada di seluruh scene
+            Destroy(this);
+            return;
         }
-        else
-        {
-            Destroy(gameObject); // Menghancurkan duplikat Player
-        }
+
+        Instance = this;
+
+        DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
+    // Getting Component
+    void Start()
     {
+        // Get PlayerMovement components
         playerMovement = GetComponent<PlayerMovement>();
 
-        // Inisialisasi animator
-        animator = transform.Find("Engine/EngineEffect")?.GetComponent<Animator>();
-        
-        // Log error jika animator tidak ditemukan
-        if (animator == null)
+        // Get Animator components
+        animator = GameObject.Find("EngineEffects").GetComponent<Animator>();
+    }
+
+    // Using FixedUpdate to Move because of physics
+    void FixedUpdate()
+    {
+        playerMovement.Move();
+    }
+
+    // LateUpdate for animation related
+    void LateUpdate()
+    {
+        playerMovement.MoveBound();
+        animator.SetBool("IsMoving", playerMovement.IsMoving());
+    }
+
+    private WeaponPickup currentWeaponPickup;
+
+    public void SwitchWeapon(Weapon newWeapon, WeaponPickup newWeaponPickup)
+    {
+        if (currentWeaponPickup != null)
         {
-            Debug.LogError("Animator tidak ditemukan! Pastikan 'Engine/EngineEffect' memiliki komponen Animator.");
+            currentWeaponPickup.PickupHandler(true);  // Make the previous weapon pickup visible again
         }
-    }
-
-    private void FixedUpdate()
-    {
-        // Memastikan Player dapat bergerak
-        if (playerMovement != null)
-        {
-            playerMovement.Move();
-        }
-    }
-
-    private void LateUpdate()
-    {
-        // Pengecekan null untuk menghindari error jika animator hilang
-        if (animator != null)
-        {
-            bool isMoving = playerMovement != null && playerMovement.IsMoving();
-            animator.SetBool("IsMoving", isMoving);
-        }
-    }
-
-    // Tambahkan metode untuk mengubah status HasWeapon
-    public void EquipWeapon()
-    {
-        HasWeapon = true;
-    }
-
-    public void UnequipWeapon()
-    {
-        HasWeapon = false;
+        currentWeaponPickup = newWeaponPickup;
     }
 }
