@@ -1,33 +1,45 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Enemy : MonoBehaviour
 {
-    public int level = 1; // Level enemy yang bisa diatur
-    public float speed = 2f; // Kecepatan dasar untuk pergerakan musuh
+    [Header("Enemy Stats")]
+    public float speed = 2f;          // Kecepatan gerakan musuh
+    public int maxHealth = 50;        // Health maksimum musuh
+    private int currentHealth;        // Health saat ini
 
-    // Method untuk mengambil referensi Player (bisa digunakan pada Enemy Targeting)
-    protected Transform player;
+    [Header("Events")]
+    public UnityEvent enemyKilledEvent; // Event saat musuh mati
 
     protected virtual void Start()
     {
-        // Mencari Player di scene berdasarkan tag
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            player = playerObj.transform;
-        }
+        currentHealth = maxHealth;     // Inisialisasi health
+        enemyKilledEvent ??= new UnityEvent();
     }
 
     protected virtual void Update()
     {
-        // Perilaku dasar dapat diatur di subclass
+        Move();
     }
 
-    // Method yang bisa ditambahkan di setiap musuh untuk memberikan damage atau interaksi lain
-    public virtual void TakeDamage(int damage)
+    protected virtual void Move()
     {
-        // Logika ketika enemy menerima damage
-        Debug.Log($"{gameObject.name} took {damage} damage.");
-        Destroy(gameObject); // Hancurkan enemy setelah menerima damage, atau kurangi health jika ada
+        // Default gerakan: ke bawah
+        transform.Translate(Vector3.down * speed * Time.deltaTime);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    protected virtual void Die()
+    {
+        enemyKilledEvent.Invoke(); // Panggil event
+        Destroy(gameObject);       // Hancurkan musuh
     }
 }

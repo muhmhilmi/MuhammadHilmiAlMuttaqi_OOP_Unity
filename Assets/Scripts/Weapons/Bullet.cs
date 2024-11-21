@@ -1,57 +1,76 @@
+using System;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.Pool;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 30f; // Kecepatan peluru
-    public int damage = 10;   // Damage yang diberikan peluru
+    [Header("Bullet Stats")]
+    public float bulletSpeed = 20f;        // Kecepatan peluru
+    public int damage = 10;               // Damage yang diberikan peluru
 
-    private Rigidbody2D rb;
-    private Weapon weapon;    // Referensi ke Weapon untuk mengembalikan Bullet ke pool
+    private Rigidbody2D rb;               // Referensi ke Rigidbody2D
+    public IObjectPool<Bullet> objectPool; // Pooling untuk mengelola peluru
 
-    void Start()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        if (rb == null)
+        Assert.IsNotNull(rb, "Rigidbody2D harus ada pada objek Bullet!"); // Validasi
+    }
+
+    private void OnEnable()
+    {
+        // Ketika bullet diaktifkan, atur velocity
+        if (rb != null)
         {
-            rb = gameObject.AddComponent<Rigidbody2D>();
+            rb.velocity = transform.up * bulletSpeed; // Peluru bergerak ke atas
         }
-
-        rb.gravityScale = 0f; // Tidak terpengaruh gravitasi
     }
 
-    void OnEnable()
+    private void Update()
     {
-        // Saat bullet diaktifkan, tentukan arah dan kecepatan
-        rb.velocity = transform.up * speed; // Menggunakan arah BulletSpawnPoint untuk bergerak
+        // Periksa apakah peluru keluar dari layar
+        Vector2 viewportPosition = Camera.main.WorldToViewportPoint(transform.position);
+
+        if (viewportPosition.y > 1.01f || viewportPosition.y < -0.01f || viewportPosition.x > 1.01f || viewportPosition.x < -0.01f)
+        {
+            // Kembalikan peluru ke pool jika keluar layar
+            ReleaseBullet();
+        }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
+        // Jika peluru mengenai Enemy
         if (other.CompareTag("Enemy"))
         {
-            Debug.Log("Bullet hit an enemy!");
-
-            // Optional: Mengurangi health Enemy jika ada script HealthComponent
-            // Enemy enemy = other.GetComponent<Enemy>();
-            // if (enemy != null)
-            // {
-            //     enemy.TakeDamage(damage);
-            // }
-
-            // Mengembalikan Bullet ke pool
-            if (weapon != null)
+            // Ambil HitboxComponent pada Enemy dan berikan damage
+            var hitbox = other.GetComponent<HitboxComponent>();
+            if (hitbox != null)
             {
-                weapon.ReturnBulletToPool(gameObject);
+                hitbox.Damage(this); // Damage menggunakan peluru ini
             }
+
+            // Kembalikan peluru ke pool setelah tabrakan
+            ReleaseBullet();
+        }
+        else if (other.CompareTag("Wall")) // Opsional: Jika peluru mengenai tembok
+        {
+            ReleaseBullet();
         }
     }
 
-    void OnBecameInvisible()
+    private void ReleaseBullet()
     {
-        // Mengembalikan Bullet ke pool ketika keluar dari layar
-        if (weapon != null)
+        // Kembalikan peluru ke pool hanya jika objectPool tidak null
+        if (objectPool != null)
         {
-            weapon.ReturnBulletToPool(gameObject);
+            objectPool.Release(this);
+        }
+        else
+        {
+            // Jika tidak ada pooling, hancurkan peluru
+            Destroy(gameObject);
         }
     }
 }
