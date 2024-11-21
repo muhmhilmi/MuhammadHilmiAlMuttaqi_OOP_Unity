@@ -143,8 +143,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfbebd936a538ef45a87f5ec4581263c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  level: 1
   speed: 2
-  bulletPrefab: {fileID: 0}
-  bulletSpawnPoint: {fileID: 0}
+  maxHealth: 50
+  enemyKilledEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  bulletPrefab: {fileID: 6216575270884284954, guid: dba88d20441898d4b861a5fd9a745e85, type: 3}
+  bulletSpawnPoints: []
   shootInterval: 3
+  movementRange: 5
