@@ -1,44 +1,36 @@
 using UnityEngine;
 
-public class EnemyHorizontalMovement : Enemy
+public class EnemyHorizontal : Enemy
 {
-    private float direction = 1f; // Arah gerakan horizontal (1 = kanan, -1 = kiri)
-
-    [Header("Horizontal Movement Settings")]
-    public float boundaryOffset = 3f; // Jarak batas kiri dan kanan dari posisi awal
-
-    private float leftBoundary;  // Batas kiri gerakan
-    private float rightBoundary; // Batas kanan gerakan
-    private float initialY;      // Posisi awal pada sumbu Y
-
-    protected override void Start()
+    public float speed = 1f;
+    private Vector2 screenBounds;
+    private Vector2 direction;
+    private Rigidbody2D rb;
+    
+    void Start()
     {
-        base.Start();
+        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
 
-        // Simpan posisi awal Y untuk memastikan tidak berubah
-        initialY = transform.position.y;
+        float spawnX = Random.value < 0.5f ? -screenBounds.x - 1f : screenBounds.x + 1f;
+        float spawnY = Random.Range(-screenBounds.y + 2f, screenBounds.y - 2f);
 
-        // Tetapkan batas kiri dan kanan berdasarkan posisi awal
-        leftBoundary = transform.position.x - boundaryOffset;
-        rightBoundary = transform.position.x + boundaryOffset;
+        transform.position = new Vector2(spawnX, spawnY);
+        direction = spawnX < 0 ? Vector2.right : Vector2.left;
+
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    protected override void Move()
+    void Update()
     {
-        // Gerakan horizontal pada sumbu X
-        transform.position += Vector3.right * direction * speed * Time.deltaTime;
+        rb.velocity = direction * speed;
 
-        // Jika mencapai batas kiri atau kanan, ubah arah
-        if (transform.position.x > rightBoundary)
+        if (transform.position.x > screenBounds.x + 1f && direction == Vector2.right)
         {
-            direction = -1f; // Bergerak ke kiri
+            direction = Vector2.left;
         }
-        else if (transform.position.x < leftBoundary)
+        else if (transform.position.x < -screenBounds.x - 1f && direction == Vector2.left)
         {
-            direction = 1f; // Bergerak ke kanan
+            direction = Vector2.right;
         }
-
-        // Pastikan posisi Y tetap sama (tidak berubah karena glitch atau bug)
-        transform.position = new Vector3(transform.position.x, initialY, transform.position.z);
     }
 }

@@ -1,47 +1,55 @@
 using UnityEngine;
 
-public class EnemyTargetPlayer : Enemy
+public class EnemyTargeting : Enemy
 {
-    private Transform player; // Referensi ke pemain (Player)
-    private Rigidbody2D rb;   // Rigidbody2D untuk pergerakan
+    public float speed = 5f;
+    private Vector2 screenBounds;
+    private Rigidbody2D rb;
+    private Transform player;
 
-    protected override void Start()
+    public override int level { get; set; } = 3;
+
+    void Start()
     {
-        base.Start();
+        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
 
-        // Cari objek pemain berdasarkan Tag
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        float spawnX = Random.value < 0.5f ? -screenBounds.x - 1f : screenBounds.x + 1f;
+        float spawnY = Random.Range(-screenBounds.y + 2f, screenBounds.y - 2f);
 
-        // Ambil komponen Rigidbody2D
+        transform.position = new Vector2(spawnX, spawnY);
+
         rb = GetComponent<Rigidbody2D>();
 
-        // Debug log untuk memastikan player ditemukan
-        if (player == null)
-        {
-            Debug.LogError("Player not found! Make sure the Player object has the correct Tag.");
-        }
-
-        if (rb == null)
-        {
-            Debug.LogError("Rigidbody2D not found! Make sure the enemy has a Rigidbody2D component.");
-        }
+        player = GameObject.Find("Player").transform; 
     }
 
-    protected override void Move()
+    void Update()
     {
-        // Pastikan player ada di scene
-        if (player != null)
-        {
-            // Hitung arah menuju posisi pemain
-            Vector2 direction = (player.position - transform.position).normalized;
+        if (player == null) return;
 
-            // Pergerakan musuh menggunakan Rigidbody2D
-            rb.velocity = direction * speed;
-        }
-        else
+        // Debug.Log(player.position);
+        Vector2 directionToPlayer = (player.position - transform.position).normalized;
+
+        rb.velocity = directionToPlayer * speed;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && other.gameObject.name != "Bullet(Clone)")
         {
-            // Jika player tidak ditemukan, hentikan pergerakan
-            rb.velocity = Vector2.zero;
+            EnemySpawner[] enemySpawners = FindObjectsOfType<EnemySpawner>();
+            foreach (EnemySpawner spawner in enemySpawners)
+            {
+                if (spawner.spawnedEnemy.name == gameObject.name.Replace("(Clone)", "").Trim())
+                {
+                    spawner.IncreaseKillCount();
+                }
+            }
+
+            CombatManager combatManager = FindObjectOfType<CombatManager>();
+            combatManager.totalEnemies--;
+
+            Destroy(gameObject);
         }
     }
 }

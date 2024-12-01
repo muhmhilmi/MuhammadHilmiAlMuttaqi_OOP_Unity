@@ -1,33 +1,69 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Enemy Spawner Settings")]
-    public GameObject enemyPrefab;         // Prefab musuh
-    public Transform[] spawnPoints;        // Posisi spawn musuh
-    public float spawnInterval = 3f;       // Interval waktu spawn
-    public int spawnCount = 1;             // Jumlah musuh di setiap spawn
+    [Header("Enemy Prefabs")]
+    public Enemy spawnedEnemy;
 
-    private float spawnTimer = 0;          // Timer untuk spawn musuh
+    [SerializeField] private int minimumKillsToIncreaseSpawnCount = 2;
+    public int totalKill = 0;
+    private int totalKillWave = 0;
 
-    void Update()
+    [SerializeField] private float spawnInterval = 3f;
+
+    [Header("Spawned Enemies Counter")]
+    public int spawnCount = 0;
+    public int defaultSpawnCount = 1;
+    public int spawnCountMultiplier = 1;
+    public int multiplierIncreaseCount = 1;
+
+    public CombatManager combatManager;
+    public bool isSpawning = false;
+
+    public float timer = 0;
+
+    void Start()
     {
-        // Hitung waktu untuk spawn
-        spawnTimer += Time.deltaTime;
-        if (spawnTimer >= spawnInterval)
+        Assert.IsTrue(spawnedEnemy != null, "Tambahkan 1 Prefab Enemy terlebih dahulu!");
+        spawnCount = defaultSpawnCount;
+    }
+
+    private void Update()
+    {
+        if (isSpawning && spawnCount > 0)
         {
-            SpawnEnemies();                // Spawn musuh
-            spawnTimer = 0;                // Reset timer
+            timer += Time.deltaTime;
+            if (totalKillWave >= minimumKillsToIncreaseSpawnCount)
+            {
+                defaultSpawnCount += defaultSpawnCount * spawnCountMultiplier;
+                spawnCountMultiplier += multiplierIncreaseCount;
+                totalKillWave = 0;
+            }
+            if (timer > spawnInterval)
+            {
+                spawnCount--;
+                Instantiate(spawnedEnemy);
+                timer = 0;
+            }
         }
     }
 
-    void SpawnEnemies()
+    public void IncreaseKillCount()
     {
-        for (int i = 0; i < spawnCount; i++)
-        {
-            // Pilih posisi spawn secara acak
-            Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
-        }
+        totalKill++;
+        totalKillWave++;
+    }
+
+    public void resetSpawnCount()
+    {
+        spawnCount = defaultSpawnCount;
+    }
+
+    public void setTimerFirst()
+    {
+        timer = spawnInterval;
     }
 }

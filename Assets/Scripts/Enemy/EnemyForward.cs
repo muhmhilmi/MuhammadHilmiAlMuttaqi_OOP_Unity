@@ -1,22 +1,36 @@
 using UnityEngine;
 
-public class EnemyForwardMovement : Enemy
+public class EnemyForward : Enemy
 {
-    protected override void Move()
+    public float speed = 1f;
+    private Vector2 screenBounds;
+    private Vector2 direction;
+    private Rigidbody2D rb;
+    
+    void Start()
     {
-        // Gerakan ke bawah
-        transform.Translate(Vector3.down * speed * Time.deltaTime);
+        screenBounds = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, Camera.main.transform.position.z));
 
-        // Jika keluar layar, respawn di posisi acak
-        if (Camera.main.WorldToViewportPoint(transform.position).y < -0.05f)
-        {
-            PickRandomPosition();
-        }
+        float spawnX = Random.Range(-screenBounds.x + 2f, screenBounds.x - 2f);
+        float spawnY = Random.value < 0.5f ? -screenBounds.y - 1f : screenBounds.y + 1f;
+
+        transform.position = new Vector2(spawnX, spawnY);
+        direction = spawnY < 0 ? Vector2.up : Vector2.down;
+
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    private void PickRandomPosition()
+    void Update()
     {
-        Vector2 randPos = new Vector2(Random.Range(0.1f, 0.9f), 1.1f); // Spawn di atas layar
-        transform.position = Camera.main.ViewportToWorldPoint(randPos) + Vector3.forward * 10;
+        rb.velocity = direction * speed;
+
+        if (transform.position.y > screenBounds.y + 1f && direction == Vector2.up)
+        {
+            direction = Vector2.down;
+        }
+        else if (transform.position.y < -screenBounds.y - 1f && direction == Vector2.down)
+        {
+            direction = Vector2.up;
+        }
     }
 }

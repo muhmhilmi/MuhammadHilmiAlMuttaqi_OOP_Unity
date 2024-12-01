@@ -1,62 +1,49 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBoss : Enemy
 {
-    [Header("Boss Weapon")]
-    public GameObject bulletPrefab;         // Prefab peluru
-    public Transform[] bulletSpawnPoints;   // Posisi spawn peluru
-    public float shootInterval = 1.5f;      // Interval menembak
-    private float shootTimer;               // Timer untuk menembak
+    public float speed = 2f;
+    private Vector2 moveDirection;
+    private SpriteRenderer spriteRenderer;  
 
-    [Header("Boss Movement")]
-    public float movementRange = 5f;       // Rentang gerakan horizontal
-    private bool movingRight = true;       // Arah gerakan
-    private Vector3 startPosition;         // Posisi awal
+    private float spawnRangeX = 8f;  // Rentang spawn di X
+    private float spawnYRange = 4f;  // Rentang spawn di Y
 
-    protected override void Start()
+    private void Start()
     {
-        base.Start();
-        startPosition = transform.position; // Simpan posisi awal
+        spriteRenderer = GetComponent<SpriteRenderer>();// Spawn musuh dengan jumlah acak
+        RespawnAtSide();
     }
 
-    protected override void Update()
+    private void Update()
     {
-        base.Update();
-        HandleShooting();
-    }
+        // Gerakkan musuh secara horizontal
+        transform.Translate(moveDirection * speed * Time.deltaTime);
 
-    protected override void Move()
-    {
-        // Gerakan bolak-balik secara horizontal
-        float direction = movingRight ? 1 : -1;
-        transform.Translate(Vector3.right * direction * speed * Time.deltaTime);
-
-        // Balik arah jika mencapai batas
-        if (transform.position.x > startPosition.x + movementRange)
+        // Jika musuh keluar dari layar di bagian kiri atau kanan, respawn di sisi berlawanan
+        if (transform.position.x < -spawnRangeX || transform.position.x > spawnRangeX)
         {
-            movingRight = false;
-        }
-        else if (transform.position.x < startPosition.x - movementRange)
-        {
-            movingRight = true;
+            RespawnAtSide();
         }
     }
 
-    private void HandleShooting()
+    // Method untuk memposisikan musuh secara acak di sisi kiri atau kanan layar
+    private void RespawnAtSide()
     {
-        shootTimer += Time.deltaTime;
-        if (shootTimer >= shootInterval)
-        {
-            Shoot();
-            shootTimer = 0;
-        }
-    }
+        // Tentukan sisi spawn secara acak (kiri atau kanan)
+        float spawnX = Random.Range(0, 2) == 0 ? -spawnRangeX : spawnRangeX;
+        float spawnY = Random.Range(-spawnYRange, spawnYRange);
 
-    private void Shoot()
-    {
-        foreach (Transform spawnPoint in bulletSpawnPoints)
-        {
-            Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
-        }
+        // Set posisi musuh di sisi kiri atau kanan dengan posisi Y acak
+        transform.position = new Vector2(spawnX, spawnY);
+
+        // Tentukan arah pergerakan horizontal berdasarkan sisi spawn
+        moveDirection = spawnX < 0 ? Vector2.right : Vector2.left;
+
+        // Pastikan rotasi tetap pada keadaan awal (menghadap arah horizontal)
+        transform.rotation = Quaternion.identity;
     }
+    
 }
