@@ -1,30 +1,31 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider2D))]
 public class HealthComponent : MonoBehaviour
 {
-    [Header("Health Settings")]
-    public int maxHealth = 100;  // Nilai health maksimum
-    public int health;           // Nilai health saat ini
+    [SerializeField] public float maxHealth;
+    [SerializeField] private float health;
 
     // Getter untuk health
-    public int Health
-    {
-        get { return health; }
-    }
+    public float Health => health;
 
-    // Setter untuk mengurangi health
-    public void Subtract(int damage)
+    // Subtract damage from health
+    private void Start()
+    {
+        health = maxHealth; // Initialize health to maxHealth at the start
+    }
+    
+    public void Subtract(float damage)
     {
         health -= damage;
+        Debug.Log($"Health reduced by {damage}. Current health: {health}");
         if (health <= 0)
         {
-            Destroy(gameObject);  // Hancurkan objek jika health <= 0
+            Destroy(gameObject); // Destroy the object when health is 0 or less
         }
     }
 
-    // Initialize health saat entitas pertama kali muncul
-    void Start()
-    {
-        health = maxHealth; // Set health ke nilai maksimum saat start
-    }
 }
+

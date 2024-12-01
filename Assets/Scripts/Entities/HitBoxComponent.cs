@@ -1,36 +1,64 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class HitboxComponent : MonoBehaviour
 {
-    private HealthComponent healthComponent;  // Referensi ke HealthComponent
+    [SerializeField] private HealthComponent healthComponent;
+    private InvicibiltyComponent invincibilityComponent; 
 
-    void Start()
+    private void Start()
     {
-        // Menemukan HealthComponent pada objek yang sama
-        healthComponent = GetComponent<HealthComponent>();
+        // Fetch the HealthComponent attached to the same GameObject or parent
+        healthComponent = GetComponent<HealthComponent>(); 
+        invincibilityComponent = GetComponent<InvicibiltyComponent>();
         if (healthComponent == null)
         {
-            Debug.LogError("HealthComponent tidak ditemukan pada objek ini.");
+            Debug.LogError("HealthComponent not found on " + gameObject.name);
         }
     }
 
-    // Fungsi untuk menerima damage
-    public void Damage(int damage)
-    {
-        if (healthComponent != null)
-        {
-            healthComponent.Subtract(damage);  // Mengurangi health berdasarkan damage
-        }
-    }
-
-    // Overloading Damage untuk menerima Bullet
+    // Method to damage using Bullet
     public void Damage(Bullet bullet)
     {
-        // Mengurangi health berdasarkan damage dari Bullet
-        if (healthComponent != null)
+        if (invincibilityComponent != null && !invincibilityComponent.isInvincible) // Cek apakah invincible
         {
-            healthComponent.Subtract(bullet.damage);
+            if (healthComponent != null)
+            {
+                Debug.Log("Applying bullet damage.");
+                healthComponent.Subtract(bullet.damage);
+                invincibilityComponent.StartInvincibility();  // Kurangi health berdasarkan damage dari bullet
+            }
+        }
+    }
+
+    // Method to damage using an integer value
+    public void Damage(int damage)
+    {
+        if (invincibilityComponent != null && !invincibilityComponent.isInvincible) // Cek apakah invincible
+        {
+            Debug.Log("Applying integer damage.");
+            healthComponent.Subtract(damage);
+            invincibilityComponent.StartInvincibility();  // Kurangi health berdasarkan damage integer
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Check if the collided object has the "Bullet" tag
+        if (other.CompareTag("Bullet"))
+        {
+            Bullet bullet = other.GetComponent<Bullet>();
+
+            if (bullet != null)
+            {
+                Debug.Log("Hit by bullet: " + bullet.name);
+                Damage(bullet); // Apply damage from the bullet
+
+                // Optionally, destroy the bullet after it hits
+                Destroy(other.gameObject);
+            }
         }
     }
 }
