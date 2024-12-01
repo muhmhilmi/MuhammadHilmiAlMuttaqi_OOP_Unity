@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 724399178672032951}
   - component: {fileID: 3765189851679820026}
   - component: {fileID: -6263893047073332002}
+  - component: {fileID: 8560439923699581128}
   m_Layer: 0
   m_Name: EnemyHorizontal
   m_TagString: Untagged
@@ -144,7 +145,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2
-  maxHealth: 50
-  enemyKilledEvent:
-    m_PersistentCalls:
-      m_Calls: []
+  level: 1
+--- !u!50 &8560439923699581128
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6219265524686459842}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6197137503070065067}
   - component: {fileID: 3298555169824796476}
   - component: {fileID: 144457992306445669}
+  - component: {fileID: -4075039270176857525}
   m_Layer: 0
   m_Name: EnemyBoss
   m_TagString: Untagged
@@ -144,11 +145,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 2
-  maxHealth: 50
-  enemyKilledEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  bulletPrefab: {fileID: 6216575270884284954, guid: dba88d20441898d4b861a5fd9a745e85, type: 3}
-  bulletSpawnPoints: []
-  shootInterval: 3
-  movementRange: 5
+  shootIntervalInSeconds: 3
+  bullet: {fileID: 0}
+  bulletSpawnPoint: {fileID: 0}
+  parentTransform: {fileID: 0}
+  level: 4
+--- !u!50 &-4075039270176857525
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3273346060044464672}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
